@@ -1,27 +1,30 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
-public class CameraFollow : MonoBehaviour
+public class CameraController : MonoBehaviour
 {
-    public Transform playerTransform;
-    public Vector3 offset;
-    public float smoothSpeed = 0.125f;
+    [SerializeField] private float cameraSensitivity;
+    private float mouseX;
+    private float mouseY;
+    private Vector3 cameraRotation;
 
-    void Start()
+    private void Start()
     {
-        // Find the player by tag and get its transform
-        playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        Cursor.lockState = CursorLockMode.Locked;
+        Application.targetFrameRate = 144;
     }
 
-    void LateUpdate()
+    private void FixedUpdate()
     {
-        // Define a target position based on the player's position and the offset
-        Vector3 targetPosition = playerTransform.position + offset;
+        mouseX -= Input.GetAxis("Mouse Y") * cameraSensitivity;
+        mouseY += Input.GetAxis("Mouse X") * cameraSensitivity;
 
-        // Smoothly move the camera towards the target position
-        Vector3 smoothedPosition = Vector3.Lerp(transform.position, targetPosition, smoothSpeed);
-        transform.position = smoothedPosition;
+        cameraRotation.x = Mathf.Clamp(mouseX, -90f, 90f);
+        cameraRotation.y = mouseY;
+        cameraRotation.z = transform.eulerAngles.z;
 
-        // Optionally, you can also make the camera look at the player
-        transform.LookAt(playerTransform);
+        transform.localRotation = Quaternion.Euler(cameraRotation);
     }
 }
